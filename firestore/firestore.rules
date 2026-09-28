@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Browsers only read, and only their own org's data. All writes go through the BFF,
+// which uses the Admin SDK (bypasses these rules) after checking roles.
+// org_id and role come from custom claims set in Step 1.9.
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function myOrg()    { return request.auth.token.org_id; }
+
+    function campaignOrg(id) {
+      return get(/databases/$(db)/documents/campaigns/$(id)).data.org_id;
+    }
+
+    match /campaigns/{id} {
+      allow read: if signedIn() && resource.data.org_id == myOrg();
+      allow write: if false;
+
+      // runs, steps, drafts, pitches, approvals: readable when the parent campaign is
+      match /{sub=**} {
+        allow read: if signedIn() && campaignOrg(id) == myOrg();
+        allow write: if false;
+      }
+    }
+
+    // A member can read their own membership record (role shown in the UI).
+    match /orgs/{orgId}/members/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid && orgId == myOrg();
+      allow write: if false;
+    }
+
+    match /guardrail_events/{id} {
+      allow read, write: if false;
+    }
+
+    // Anything not matched above is denied.
+  }
+}

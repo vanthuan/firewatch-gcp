@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16          # stands in for AlloyDB locally (use ivfflat/hnsw instead of ScaNN)
+    environment: { POSTGRES_PASSWORD: dev, POSTGRES_DB: launchpad }
+    ports: ["5433:5432"]                   # host 5432 is taken by the system PostgreSQL 14
+  firestore:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    command: gcloud emulators firestore start --host-port=0.0.0.0:8080
+    ports: ["8080:8080"]
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    command: gcloud beta emulators pubsub start --project=project-3e77a7b7-cc39-467f-8a8 --host-port=0.0.0.0:8085
+    ports: ["8085:8085"]
