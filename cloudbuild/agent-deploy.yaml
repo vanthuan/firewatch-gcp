@@ -1,0 +1,33 @@
+# Deploy one agent to this project on push to main.
+# Substitutions: _SERVICE, _REGION, _RUNTIME_SA (email the agent runs as), _LOGS_BUCKET.
+# --update-only: CI never creates a new engine/service; the first deploy is done by hand.
+steps:
+  - id: deploy
+    name: gcr.io/cloud-builders/gcloud
+    dir: agents/${_SERVICE}
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        curl -LsSf https://astral.sh/uv/0.11.7/install.sh | sh
+        export PATH="$$HOME/.local/bin:$$PATH"
+        uv sync --locked
+        uvx google-agents-cli@${_AGENTS_CLI_VERSION} deploy \
+          --project ${PROJECT_ID} \
+          --region ${_REGION} \
+          --service-account ${_RUNTIME_SA} \
+          --update-only \
+          --no-confirm-project \
+          --update-env-vars "OTEL_RESOURCE_ATTRIBUTES=service.version=${COMMIT_SHA},LOGS_BUCKET_NAME=${_LOGS_BUCKET}"
+
+substitutions:
+  _SERVICE: ""
+  _REGION: us-east1
+  _RUNTIME_SA: ""
+  _LOGS_BUCKET: ""
+  _AGENTS_CLI_VERSION: "1.7.0"
+options:
+  logging: CLOUD_LOGGING_ONLY
+  env:
+    - UV_PYTHON=3.12
+    - CI=true

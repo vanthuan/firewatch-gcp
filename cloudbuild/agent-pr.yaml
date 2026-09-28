@@ -1,0 +1,70 @@
+# PR checks for one agent. Trigger substitutions: _SERVICE (folder under agents/).
+# Runs from the repo root, so every step sets dir: agents/${_SERVICE}.
+steps:
+  - id: install
+    name: gcr.io/cloud-builders/gcloud
+    dir: agents/${_SERVICE}
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        curl -LsSf https://astral.sh/uv/0.11.7/install.sh | sh
+        export PATH="$$HOME/.local/bin:$$PATH"
+        uv sync --locked
+
+  # The Dockerfile installs from the agent's own uv.lock, not the workspace one.
+  - id: agent-lockfile-current
+    name: gcr.io/cloud-builders/gcloud
+    dir: agents/${_SERVICE}
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        export PATH="$$HOME/.local/bin:$$PATH"
+        tmp=$$(mktemp -d)
+        cp pyproject.toml README.md uv.lock "$$tmp"/
+        cd "$$tmp" && uv lock --check || { echo "agents/${_SERVICE}/uv.lock is stale: run 'make lock'"; exit 1; }
+
+  - id: lint
+    name: gcr.io/cloud-builders/gcloud
+    dir: agents/${_SERVICE}
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        export PATH="$$HOME/.local/bin:$$PATH"
+        uvx google-agents-cli@${_AGENTS_CLI_VERSION} lint
+
+  - id: unit-tests
+    name: gcr.io/cloud-builders/gcloud
+    dir: agents/${_SERVICE}
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        export PATH="$$HOME/.local/bin:$$PATH"
+        uv run pytest tests/unit
+
+  - id: integration-tests
+    name: gcr.io/cloud-builders/gcloud
+    dir: agents/${_SERVICE}
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        export PATH="$$HOME/.local/bin:$$PATH"
+        uv run pytest tests/integration
+
+  # Phase 3 adds the eval gate here (tools/eval_gate.py).
+
+substitutions:
+  _SERVICE: ""
+  _AGENTS_CLI_VERSION: "1.7.0"
+options:
+  logging: CLOUD_LOGGING_ONLY
+  env:
+    - UV_PYTHON=3.12
+    - CI=true
+    - GOOGLE_GENAI_USE_VERTEXAI=true
+    - GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
+    - GOOGLE_CLOUD_LOCATION=global

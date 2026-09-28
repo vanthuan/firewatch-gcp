@@ -1,0 +1,28 @@
+# PR checks for infra/: format, validate, and a read-only plan of the dev environment.
+steps:
+  - id: fmt
+    name: hashicorp/terraform:1.15
+    entrypoint: terraform
+    args: [fmt, -check, -recursive, -diff, infra/terraform]
+
+  - id: init
+    name: hashicorp/terraform:1.15
+    dir: infra/terraform/envs/dev
+    entrypoint: terraform
+    args: [init, -input=false]
+
+  - id: validate
+    name: hashicorp/terraform:1.15
+    dir: infra/terraform/envs/dev
+    entrypoint: terraform
+    args: [validate]
+
+  # -lock=false: the plan only reads state, so it never blocks a real apply.
+  - id: plan
+    name: hashicorp/terraform:1.15
+    dir: infra/terraform/envs/dev
+    entrypoint: terraform
+    args: [plan, -input=false, -lock=false, -no-color]
+
+options:
+  logging: CLOUD_LOGGING_ONLY

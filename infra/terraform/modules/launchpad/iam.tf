@@ -13,10 +13,19 @@ locals {
     backfill     = ["roles/aiplatform.user", "roles/alloydb.client", "roles/alloydb.databaseUser", "roles/serviceusage.serviceUsageConsumer"]
   }
 
+  # Every deployed agent writes logs and traces.
+  agent_services = ["orchestrator", "advisor", "researcher", "judge", "matcher"]
+  agent_base_roles = [
+    "roles/logging.logWriter",
+    "roles/cloudtrace.agent",
+    "roles/serviceusage.serviceUsageConsumer",
+  ]
+
   project_bindings = {
     for pair in flatten([
       for svc, roles in local.project_roles : [
-        for role in roles : { svc = svc, role = role }
+        for role in distinct(concat(roles, contains(local.agent_services, svc) ? local.agent_base_roles : [])) :
+        { svc = svc, role = role }
       ] if contains(var.services, svc)
     ]) : "${pair.svc}:${pair.role}" => pair
   }
@@ -30,6 +39,11 @@ locals {
       { svc = "orchestrator", bucket = "artifacts", role = "roles/storage.objectAdmin" },
       { svc = "orchestrator", bucket = "skills", role = "roles/storage.objectViewer" },
       { svc = "advisor", bucket = "assets", role = "roles/storage.objectViewer" },
+      # ADK artifact service (LOGS_BUCKET_NAME) for agents deployed by CI
+      { svc = "advisor", bucket = "artifacts", role = "roles/storage.objectAdmin" },
+      { svc = "researcher", bucket = "artifacts", role = "roles/storage.objectAdmin" },
+      { svc = "judge", bucket = "artifacts", role = "roles/storage.objectAdmin" },
+      { svc = "matcher", bucket = "artifacts", role = "roles/storage.objectAdmin" },
     ] : "${b.svc}:${b.bucket}:${b.role}" => b if contains(var.services, b.svc)
   }
 
