@@ -1,0 +1,31 @@
+# Firestore rules tests against the emulator (Step 1.8).
+# The emulator runs as a detached container on the build's `cloudbuild` network.
+steps:
+  - id: start-emulator
+    name: gcr.io/cloud-builders/docker
+    args:
+      - run
+      - -d
+      - --name=firestore-emulator
+      - --network=cloudbuild
+      - gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+      - gcloud
+      - emulators
+      - firestore
+      - start
+      - --host-port=0.0.0.0:8080
+
+  - id: rules-tests
+    name: node:22
+    dir: firestore/tests
+    env:
+      - FIRESTORE_EMULATOR_HOST=firestore-emulator:8080
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        for i in $$(seq 1 60); do curl -sf http://firestore-emulator:8080/ >/dev/null && break; sleep 2; done
+        npm ci --no-audit --no-fund && npm test
+
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,0 +1,35 @@
+# PR checks for apps/web: lint, unit tests (once Vitest is added), build.
+steps:
+  - id: install
+    name: node:22
+    dir: apps/web
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        corepack enable
+        pnpm install --frozen-lockfile
+
+  - id: lint
+    name: node:22
+    dir: apps/web
+    entrypoint: bash
+    args: [-c, "corepack enable && pnpm lint"]
+
+  - id: unit-tests
+    name: node:22
+    dir: apps/web
+    entrypoint: bash
+    args: [-c, "corepack enable && pnpm run --if-present test"]
+
+  - id: build
+    name: node:22
+    dir: apps/web
+    entrypoint: bash
+    args: [-c, "corepack enable && pnpm build"]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  env:
+    - CI=true
+    - NEXT_TELEMETRY_DISABLED=1
