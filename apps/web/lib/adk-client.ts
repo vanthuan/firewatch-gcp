@@ -4,13 +4,26 @@ const auth = new GoogleAuth({ scopes: ["https://www.googleapis.com/auth/cloud-pl
 const base = (engine: string) =>
   `https://us-east1-aiplatform.googleapis.com/v1/${engine}`;   // engine = projects/../locations/us-east1/reasoningEngines/ID
 
+// ADK session as returned by async_create_session
+export interface AdkSession {
+  id: string;
+  app_name: string;
+  user_id: string;
+  state: Record<string, unknown>;
+  last_update_time?: number;
+}
+
+interface QueryResponse<T> {
+  output: T;
+}
+
 export async function createSession(engine: string, userId: string, state: Record<string, unknown>) {
   const client = await auth.getClient();
-  const res = await client.request({
+  const res = await client.request<QueryResponse<AdkSession>>({
     url: `${base(engine)}:query`, method: "POST",
     data: { class_method: "async_create_session", input: { user_id: userId, state } },
   });
-  return (res.data as any).output;           // contains the session id
+  return res.data.output;                    // res.data.output.id is the session id
 }
 
 export async function streamQuery(engine: string, userId: string, sessionId: string, message: unknown) {
