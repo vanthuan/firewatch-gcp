@@ -16,8 +16,8 @@ resolution-markers = [
 [manifest]
 members = [
     "advisor",
+    "firewatch-shared",
     "judge",
-    "launchpad-shared",
     "media-matcher",
     "orchestrator",
     "researcher",
@@ -661,6 +661,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/95/31/fbad823d8dfc56e2f
 wheels = [
     { url = "https://files.pythonhosted.org/packages/62/34/d90d7e7ef972900e09f45b9c0661376dd03e77fece26ee83ec93b7719bae/filelock-4.0.5-py3-none-any.whl", hash = "sha256:be9166068623636cedcad7b2ef735b04e5fb4344d978e09fd6fbd6ede06f14f0", size = 108976, upload-time = "2026-09-28T05:07:18.341Z" },
 ]
+
+[[package]]
+name = "firewatch-shared"
+version = "0.1.0"
+source = { editable = "packages/shared-py" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.7,<3" }]
 
 [[package]]
 name = "frozenlist"
@@ -1798,17 +1809,6 @@ dev = [
     { name = "pytest", specifier = ">=9.0.2,<10.0.0" },
     { name = "pytest-asyncio", specifier = ">=1.0.0,<2.0.0" },
 ]
-
-[[package]]
-name = "launchpad-shared"
-version = "0.1.0"
-source = { editable = "packages/shared-py" }
-dependencies = [
-    { name = "pydantic" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.7,<3" }]
 
 [[package]]
 name = "litellm"

@@ -1,5 +1,5 @@
 {
-  "name": "launchpad-firestore-rules-tests",
+  "name": "firewatch-firestore-rules-tests",
   "private": true,
   "type": "module",
   "scripts": {

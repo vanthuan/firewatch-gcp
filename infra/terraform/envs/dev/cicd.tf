@@ -1,15 +1,15 @@
 # Single-project CI/CD (Step 1.12, option B). The GitHub connection and repository
 # link were created once in the console (Cloud Build > Repositories, 2nd gen).
 locals {
-  sa        = module.launchpad.service_accounts
-  artifacts = module.launchpad.buckets["artifacts"]
+  sa        = module.firewatch.service_accounts
+  artifacts = module.firewatch.buckets["artifacts"]
 }
 
 module "cicd" {
   source        = "../../modules/cicd"
   project_id    = var.project_id
   region        = var.region
-  repository_id = "projects/${var.project_id}/locations/${var.region}/connections/github-launchpad/repositories/vanthuan-launchpad"
+  repository_id = "projects/${var.project_id}/locations/${var.region}/connections/github-firewatch/repositories/vanthuan-firewatch-gcp"
 
   agents = {
     # Keeps the identity and bucket the agents-cli Terraform gave this engine (Step 1.5).

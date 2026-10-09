@@ -5,6 +5,6 @@
 terraform {
   backend "gcs" {
     bucket = "project-3e77a7b7-cc39-467f-8a8-tfstate"
-    prefix = "launchpad/dev"
+    prefix = "firewatch/dev"
   }
 }

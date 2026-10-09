@@ -4,7 +4,7 @@ resource "google_service_account" "sa" {
   for_each     = toset(var.services)
   project      = var.project_id
   account_id   = "sa-${each.key}"
-  display_name = "LaunchPad ${each.key}"
+  display_name = "FireWatch ${each.key}"
 
   depends_on = [google_project_service.apis]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@launchpad/shared-ts",
+  "name": "@firewatch/shared-ts",
   "private": true,
   "type": "module",
   "main": "src/schemas.ts",

@@ -14,7 +14,7 @@ resource "google_secret_manager_secret_version" "alloydb_password" {
 resource "google_alloydb_cluster" "main" {
   count      = var.enable_alloydb ? 1 : 0
   project    = var.project_id
-  cluster_id = "launchpad"
+  cluster_id = "firewatch"
   location   = var.region
 
   network_config {
@@ -50,7 +50,7 @@ resource "google_alloydb_cluster" "main" {
 resource "google_alloydb_instance" "primary" {
   count         = var.enable_alloydb ? 1 : 0
   cluster       = google_alloydb_cluster.main[0].name
-  instance_id   = "launchpad-primary"
+  instance_id   = "firewatch-primary"
   instance_type = "PRIMARY"
 
   machine_config {

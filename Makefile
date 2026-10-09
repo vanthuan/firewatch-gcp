@@ -1,4 +1,4 @@
-# LaunchPad monorepo tasks. Run `make help` for the list.
+# FireWatch monorepo tasks. Run `make help` for the list.
 # Recipes must be indented with a TAB, not spaces.
 
 AGENT  ?= orchestrator                 # agent for `make dev` / `make playground`, e.g. make dev AGENT=advisor
@@ -64,8 +64,8 @@ test-rules: up  ## Test firestore/firestore.rules against the emulator (runs in 
 	  sh -c "npm ci --no-audit --no-fund --loglevel=error && npm test"
 
 .PHONY: schemas
-schemas:  ## Regenerate packages/shared-ts from launchpad_shared.models (Step 2.1)
-	uv run --package launchpad-shared python -m launchpad_shared.export_schema > packages/shared-ts/schema.json
+schemas:  ## Regenerate packages/shared-ts from firewatch_shared.models (Step 2.1)
+	uv run --package firewatch-shared python -m firewatch_shared.export_schema > packages/shared-ts/schema.json
 	docker run --rm -u $$(id -u):$$(id -g) -e HOME=/tmp -v "$(CURDIR)":/w -w /w/packages/shared-ts node:22 \
 	  sh -c "npm install --no-audit --no-fund --loglevel=error && npm run -s generate"
 

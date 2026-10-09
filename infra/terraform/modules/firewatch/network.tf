@@ -1,6 +1,6 @@
 resource "google_compute_network" "vpc" {
   project                 = var.project_id
-  name                    = "launchpad-vpc"
+  name                    = "firewatch-vpc"
   auto_create_subnetworks = false
   depends_on              = [google_project_service.apis]
 }
@@ -8,7 +8,7 @@ resource "google_compute_network" "vpc" {
 # Cloud Run services/jobs attach here with Direct VPC egress (Step 1.7).
 resource "google_compute_subnetwork" "main" {
   project                  = var.project_id
-  name                     = "launchpad-${var.region}"
+  name                     = "firewatch-${var.region}"
   region                   = var.region
   network                  = google_compute_network.vpc.id
   ip_cidr_range            = var.subnet_cidr
@@ -18,7 +18,7 @@ resource "google_compute_subnetwork" "main" {
 # Private Services Access range used by AlloyDB.
 resource "google_compute_global_address" "psa" {
   project       = var.project_id
-  name          = "launchpad-psa"
+  name          = "firewatch-psa"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -33,14 +33,14 @@ resource "google_service_networking_connection" "psa" {
 
 resource "google_compute_router" "router" {
   project = var.project_id
-  name    = "launchpad-router"
+  name    = "firewatch-router"
   region  = var.region
   network = google_compute_network.vpc.id
 }
 
 resource "google_compute_router_nat" "nat" {
   project                            = var.project_id
-  name                               = "launchpad-nat"
+  name                               = "firewatch-nat"
   router                             = google_compute_router.router.name
   region                             = var.region
   nat_ip_allocate_option             = "AUTO_ONLY"
@@ -51,7 +51,7 @@ resource "google_compute_router_nat" "nat" {
 # 5432 for direct connections, 5433 for the AlloyDB connectors and Auth Proxy.
 resource "google_compute_firewall" "alloydb_allow" {
   project            = var.project_id
-  name               = "launchpad-egress-alloydb-postgres"
+  name               = "firewatch-egress-alloydb-postgres"
   network            = google_compute_network.vpc.id
   direction          = "EGRESS"
   priority           = 1000
@@ -64,7 +64,7 @@ resource "google_compute_firewall" "alloydb_allow" {
 
 resource "google_compute_firewall" "alloydb_deny_rest" {
   project            = var.project_id
-  name               = "launchpad-egress-alloydb-deny-other"
+  name               = "firewatch-egress-alloydb-deny-other"
   network            = google_compute_network.vpc.id
   direction          = "EGRESS"
   priority           = 1100

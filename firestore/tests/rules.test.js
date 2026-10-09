@@ -9,7 +9,7 @@ let env;
 
 beforeAll(async () => {
   env = await initializeTestEnvironment({
-    projectId: "demo-launchpad",
+    projectId: "demo-firewatch",
     firestore: {
       host,
       port: Number(port),

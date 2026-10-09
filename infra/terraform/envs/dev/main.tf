@@ -1,6 +1,6 @@
 # infra/terraform/envs/dev/main.tf
-module "launchpad" {
-  source         = "../../modules/launchpad"
+module "firewatch" {
+  source         = "../../modules/firewatch"
   project_id     = var.project_id
   region         = var.region
   vector_backend = "alloydb"

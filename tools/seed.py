@@ -40,7 +40,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SEED = ROOT / "data" / "seed"
 SCHEMA = Path(__file__).resolve().parent / "sql" / "schema.sql"
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://postgres:dev@localhost:5433/launchpad")
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://postgres:dev@localhost:5433/firewatch")
 ORG_ID = os.environ.get("SEED_ORG_ID", "demo-org")
 DATASTORE_ID = os.environ.get("CATALOG_DATASTORE_ID", "catalog")
 KB_DATASTORE_ID = os.environ.get("KB_DATASTORE_ID", "kb")

@@ -1,6 +1,6 @@
-output "launchpad" {
-  description = "Resource names created by the LaunchPad module"
-  value       = module.launchpad
+output "firewatch" {
+  description = "Resource names created by the FireWatch module"
+  value       = module.firewatch
 }
 
 output "cicd" {

@@ -1,6 +1,6 @@
 """Usage: python3 tools/build_full_impl_doc.py .   (from the repo root)
 
-Builds docs/launchpad-full-implementation.md.
+Builds docs/firewatch-full-implementation.md.
 
 From-scratch sections are written here; files that already exist in the repo are embedded verbatim
 (so the document always matches the code); later steps are taken from the playbook.
@@ -11,8 +11,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(sys.argv[1])
-PLAYBOOK = (ROOT / "docs/launchpad-implementation-playbook.md").read_text()
-OUT = ROOT / "docs/launchpad-full-implementation.md"
+PLAYBOOK = (ROOT / "docs/firewatch-implementation-playbook.md").read_text()
+OUT = ROOT / "docs/firewatch-full-implementation.md"
 
 LANG = {".py": "python", ".tf": "hcl", ".yaml": "yaml", ".yml": "yaml", ".json": "json", ".js": "js",
         ".mjs": "js", ".ts": "ts", ".toml": "toml", ".sql": "sql", ".sh": "bash", ".rules": "",
@@ -57,10 +57,10 @@ parts: list[str] = []
 add = parts.append
 
 # ---------------------------------------------------------------------------------------------
-add("""# LaunchPad: Full Implementation, From Zero to Go-Live
+add("""# FireWatch: Full Implementation, From Zero to Go-Live
 
-This document rebuilds the whole LaunchPad platform from an empty GitHub repository and an empty Google
-Cloud project, in order, with every command and every file. It follows the *Cymbal LaunchPad
+This document rebuilds the whole FireWatch platform from an empty GitHub repository and an empty Google
+Cloud project, in order, with every command and every file. It follows the *Cymbal FireWatch
 Implementation Guide v2*, adapted to a **single Google Cloud project** and to what was learned while
 building it.
 
@@ -232,8 +232,8 @@ failed `terraform apply` while building Step 2.3).
 1. **[Cloud]** Create the repository and clone it:
 
    ```bash
-   gh repo create vanthuan/launchpad --private --clone
-   cd launchpad
+   gh repo create vanthuan/firewatch-gcp --private --clone
+   cd firewatch-gcp
    ```
 
    Protect `main` (Settings → Branches): require a pull request and passing checks.
@@ -286,17 +286,17 @@ one Python lockfile and one pnpm lockfile, and deploy through path-filtered pipe
 **Diagram**
 
 ```text
-launchpad/
+firewatch-gcp/
 ├── apps/web/                  Next.js app: UI + BFF route handlers                (1.10)
 ├── agents/                    one agents-cli project per agent                    (1.3)
 │   ├── orchestrator/  advisor/            Agent Runtime
 │   └── researcher/  judge/  media-matcher/ Cloud Run (A2A)
 ├── skills/                    promo-writer, social-post, press-release, research  (3.1)
 ├── packages/
-│   ├── shared-py/launchpad_shared/        Pydantic models, kb search, guardrails  (2.1)
+│   ├── shared-py/firewatch_shared/        Pydantic models, kb search, guardrails  (2.1)
 │   └── shared-ts/                         generated zod schemas                   (2.1)
 ├── workers/                   ingest, dispatch, backfill, pitch (Cloud Run)       (2.5, 3.8, 4.x)
-├── infra/terraform/           modules/{launchpad,cicd}, envs/dev                  (1.6, 1.12)
+├── infra/terraform/           modules/{firewatch,cicd}, envs/dev                  (1.6, 1.12)
 ├── cloudbuild/                pipeline files                                      (1.12)
 ├── firestore/                 rules, indexes, rules tests                         (1.8)
 ├── tools/                     seed, admin and eval scripts                        (2.2)
@@ -310,7 +310,7 @@ launchpad/
 
    ```bash
    mkdir -p apps agents skills packages/shared-py packages/shared-ts workers \\
-            infra/terraform/modules/launchpad infra/terraform/modules/cicd infra/terraform/envs/dev \\
+            infra/terraform/modules/firewatch infra/terraform/modules/cicd infra/terraform/envs/dev \\
             cloudbuild firestore/tests tools/sql data/seed docs/adr
    ```
 
@@ -396,7 +396,7 @@ GOOGLE_GENAI_USE_VERTEXAI=TRUE
 VECTOR_BACKEND=alloydb
 FIRESTORE_EMULATOR_HOST=localhost:8080     # only for code that should use the emulator
 PUBSUB_EMULATOR_HOST=localhost:8085
-DATABASE_URL=postgresql://postgres:dev@localhost:5433/launchpad
+DATABASE_URL=postgresql://postgres:dev@localhost:5433/firewatch
 ```
 
 """)
@@ -409,7 +409,7 @@ add(embed("Makefile",
           "Recipe lines must start with a Tab. Later steps add `vendor` (2.6a) and extend `lock` to workers (2.5)."))
 add("""
 **Check:** `make up` then `docker compose ps` shows three healthy services;
-`docker compose exec -T postgres psql -U postgres -d launchpad -c "CREATE EXTENSION IF NOT EXISTS vector"` succeeds;
+`docker compose exec -T postgres psql -U postgres -d firewatch -c "CREATE EXTENSION IF NOT EXISTS vector"` succeeds;
 `curl localhost:8080` and `curl localhost:8085` print `Ok`.
 
 **If it fails:** `address already in use` on a port: another service uses it; change the host side of the
@@ -447,7 +447,7 @@ terraform plan -destroy -var-file=vars/env.tfvars
 terraform destroy -var-file=vars/env.tfvars      # the logs bucket must be empty first
 ```
 
-### Step 1.6 LaunchPad Terraform module
+### Step 1.6 FireWatch Terraform module
 
 **Why:** everything agents-cli does not create (APIs, service accounts, buckets, Pub/Sub, Firestore,
 secrets, BigQuery, network, AlloyDB, IAM) comes from code, so the project can be rebuilt and drift is
@@ -457,9 +457,9 @@ visible.
 
 ```text
  infra/terraform/envs/dev  (root: backend, providers, variables)
-   ├── module "launchpad"  → modules/launchpad  (resources, one file per area)
+   ├── module "firewatch"  → modules/firewatch  (resources, one file per area)
    └── module "cicd"       → modules/cicd       (Step 1.12)
- state: gs://<project>-tfstate/launchpad/dev  (created by hand, versioned)
+ state: gs://<project>-tfstate/firewatch/dev  (created by hand, versioned)
 ```
 
 **Actions**
@@ -475,7 +475,7 @@ visible.
 
 """)
 for path, explain in [
-    ("infra/terraform/envs/dev/backend.tf", "stores state in the bucket above, under `launchpad/dev`. Versioning lets you recover an older state."),
+    ("infra/terraform/envs/dev/backend.tf", "stores state in the bucket above, under `firewatch/dev`. Versioning lets you recover an older state."),
     ("infra/terraform/envs/dev/providers.tf",
      "pins provider versions and sets `user_project_override` + `billing_project`, so API quota is billed to "
      "your project for any credential. Without it, Discovery Engine calls from a user login fail with "
@@ -485,7 +485,7 @@ for path, explain in [
     ("infra/terraform/envs/dev/main.tf",
      "calls the module with the list of services that get their own service account. Later steps add inputs "
      "(`web_origins`, `push_endpoints`, `alert_email`, `a2a_services`, …)."),
-    ("infra/terraform/envs/dev/outputs.tf", "re-exports the module outputs (`terraform output launchpad`). Step 1.12 adds `cicd`."),
+    ("infra/terraform/envs/dev/outputs.tf", "re-exports the module outputs (`terraform output firewatch`). Step 1.12 adds `cicd`."),
 ]:
     if path.endswith("outputs.tf"):
         add(embed(path, explain, transform=lambda t: re.sub(r'\noutput "cicd" \{.*?\n\}', "", t, flags=re.S)))
@@ -532,7 +532,7 @@ module = [
                    "output is added in Step 2.3."),
 ]
 for name, explain in module:
-    path = f"infra/terraform/modules/launchpad/{name}"
+    path = f"infra/terraform/modules/firewatch/{name}"
     add(embed(path, explain, transform=drop_search_output if name == "outputs.tf" else None))
 
 add("""
@@ -564,7 +564,7 @@ Terraform shows the drift.
 **Diagram**
 
 ```text
- Cloud Run service/job with Direct VPC egress ──▶ launchpad-vpc / subnet 10.10.0.0/24
+ Cloud Run service/job with Direct VPC egress ──▶ firewatch-vpc / subnet 10.10.0.0/24
                                                     │ firewall: egress to PSA range only on 5432, 5433
                                                     ▼
                                     Private Services Access peering ──▶ AlloyDB primary (private IP)
@@ -572,7 +572,7 @@ Terraform shows the drift.
 ```
 
 *How to read it:* the network pieces already exist from `network.tf`. A Cloud Run service joins the VPC
-at deploy time (`--network launchpad-vpc --subnet launchpad-us-east1 --vpc-egress private-ranges-only`)
+at deploy time (`--network firewatch-vpc --subnet firewatch-us-east1 --vpc-egress private-ranges-only`)
 and connects with the AlloyDB Python connector using IAM login. Agent Runtime stays outside the VPC by
 design.
 
@@ -634,12 +634,12 @@ Cloud Build starts at the repo root.
 **Actions**
 
 1. **[Cloud]** Connect GitHub to Cloud Build (browser, once): Console → Cloud Build → **Repositories**
-   → **2nd gen** → *Create host connection*: GitHub, region **us-east1**, name `github-launchpad`;
-   authorise and install the Cloud Build GitHub App on `vanthuan/launchpad` only; then *Link repository*
-   (`vanthuan-launchpad`). Check:
+   → **2nd gen** → *Create host connection*: GitHub, region **us-east1**, name `github-firewatch`;
+   authorise and install the Cloud Build GitHub App on `vanthuan/firewatch-gcp` only; then *Link repository*
+   (`vanthuan-firewatch-gcp`). Check:
 
    ```bash
-   gcloud builds repositories list --connection=github-launchpad --region=us-east1
+   gcloud builds repositories list --connection=github-firewatch --region=us-east1
    ```
 
 2. **[Repo]** Pipeline files:
@@ -750,7 +750,7 @@ check. The Pydantic models are the source; the zod schemas the web app uses are 
 **Diagram**
 
 ```text
- packages/shared-py/launchpad_shared/models.py  ──export_schema.py──▶  packages/shared-ts/schema.json
+ packages/shared-py/firewatch_shared/models.py  ──export_schema.py──▶  packages/shared-ts/schema.json
                                                                         │ generate.mjs (per model)
                                                                         ▼
                                                   packages/shared-ts/src/schemas.ts  (zod + TS types)
@@ -758,14 +758,14 @@ check. The Pydantic models are the source; the zod schemas the web app uses are 
 
 """)
 for path, explain in [
-    ("packages/shared-py/pyproject.toml", "makes the folder a workspace package (`launchpad-shared`) that agents and workers can use."),
-    ("packages/shared-py/launchpad_shared/__init__.py", "marks the package (empty)."),
-    ("packages/shared-py/launchpad_shared/models.py",
+    ("packages/shared-py/pyproject.toml", "makes the folder a workspace package (`firewatch-shared`) that agents and workers can use."),
+    ("packages/shared-py/firewatch_shared/__init__.py", "marks the package (empty)."),
+    ("packages/shared-py/firewatch_shared/models.py",
      "the guide's models. `EXPORTED_MODELS` lists what is exported to TypeScript. Step 2.8 adds a `field` to "
      "`Citation` and the `ApprovalDecision` model."),
-    ("packages/shared-py/launchpad_shared/export_schema.py",
+    ("packages/shared-py/firewatch_shared/export_schema.py",
      "prints one JSON Schema with every exported model under `$defs`."),
-    ("packages/shared-ts/package.json", "the TypeScript package `@launchpad/shared-ts`; its entry is the generated `src/schemas.ts`."),
+    ("packages/shared-ts/package.json", "the TypeScript package `@firewatch/shared-ts`; its entry is the generated `src/schemas.ts`."),
     ("packages/shared-ts/generate.mjs",
      "converts each `$def` separately, with references inlined, into one zod schema and one inferred type per "
      "model. The guide's single `json-schema-to-zod` call only converts the root, which here is empty, so it "
@@ -780,7 +780,7 @@ add("""
 make schemas
 ```
 
-which runs `uv run --package launchpad-shared python -m launchpad_shared.export_schema > packages/shared-ts/schema.json`
+which runs `uv run --package firewatch-shared python -m firewatch_shared.export_schema > packages/shared-ts/schema.json`
 and then `generate.mjs` in a `node:22` container. `--package` is needed because the root is not itself a
 Python package. Commit `schema.json` and `src/schemas.ts`.
 
@@ -852,12 +852,12 @@ console's **Preview** tab uses. Vertex AI Search only offers `global`, `us` and 
 `global`.
 
 """)
-add(embed("infra/terraform/modules/launchpad/search.tf",
+add(embed("infra/terraform/modules/firewatch/search.tf",
           "the two datastores and two apps. `kb` parses documents with the layout parser, lets Gemini annotate "
           "tables and images, and splits them into 500-token chunks that keep their headings. The enterprise tier "
           "on `kb-search` returns the passages behind results, which citations need. Imports from GCS run as the "
           "Discovery Engine service agent, so it gets read access to the three source buckets."))
-add("**[Repo]** Add to `infra/terraform/modules/launchpad/outputs.tf`:\n\n```hcl\n" + only_search_output("infra/terraform/modules/launchpad/outputs.tf") + "\n```\n\n")
+add("**[Repo]** Add to `infra/terraform/modules/firewatch/outputs.tf`:\n\n```hcl\n" + only_search_output("infra/terraform/modules/firewatch/outputs.tf") + "\n```\n\n")
 add("""*What this does:* exposes the datastore names (for `VertexAiSearchTool(data_store_id=…)` and the chunk
 search helper) and the app IDs (for the console and queries).
 

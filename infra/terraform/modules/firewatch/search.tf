@@ -7,7 +7,7 @@ resource "google_discovery_engine_data_store" "catalog" {
   project           = var.project_id
   location          = var.search_location
   data_store_id     = "catalog"
-  display_name      = "LaunchPad product catalog"
+  display_name      = "FireWatch product catalog"
   industry_vertical = "GENERIC"
   solution_types    = ["SOLUTION_TYPE_SEARCH"]
   content_config    = "NO_CONTENT" # structured rows only
@@ -19,7 +19,7 @@ resource "google_discovery_engine_data_store" "kb" {
   project           = var.project_id
   location          = var.search_location
   data_store_id     = "kb"
-  display_name      = "LaunchPad knowledge base"
+  display_name      = "FireWatch knowledge base"
   industry_vertical = "GENERIC"
   solution_types    = ["SOLUTION_TYPE_SEARCH"]
   content_config    = "CONTENT_REQUIRED" # PDFs, images, HTML
@@ -47,7 +47,7 @@ resource "google_discovery_engine_search_engine" "catalog" {
   location          = var.search_location
   collection_id     = "default_collection"
   engine_id         = "catalog-search"
-  display_name      = "LaunchPad catalog search"
+  display_name      = "FireWatch catalog search"
   industry_vertical = "GENERIC"
   data_store_ids    = [google_discovery_engine_data_store.catalog.data_store_id]
 
@@ -61,7 +61,7 @@ resource "google_discovery_engine_search_engine" "kb" {
   location          = var.search_location
   collection_id     = "default_collection"
   engine_id         = "kb-search"
-  display_name      = "LaunchPad knowledge search"
+  display_name      = "FireWatch knowledge search"
   industry_vertical = "GENERIC"
   data_store_ids    = [google_discovery_engine_data_store.kb.data_store_id]
 

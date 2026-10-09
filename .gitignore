@@ -1,0 +1,13 @@
+.venv/
+node_modules/
+.env
+.env.*
+!.env.example
+*.tfplan
+plan.txt
+__pycache__/
+*.pyc
+.next/
+# vendored into agents by `make vendor`
+agents/*/app/shared/
+agents/*/app/skills/

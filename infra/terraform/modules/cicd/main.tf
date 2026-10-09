@@ -10,7 +10,7 @@ terraform {
 resource "google_service_account" "cloudbuild" {
   project      = var.project_id
   account_id   = "sa-cloudbuild"
-  display_name = "LaunchPad Cloud Build"
+  display_name = "FireWatch Cloud Build"
 }
 
 locals {
