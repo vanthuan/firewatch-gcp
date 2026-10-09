@@ -1,114 +1,137 @@
-# firewatch-gcp: Cymbal FireWatch agent platform
+# FireWatch: Autonomous Wildfire Intelligence and Response
 
-FireWatch is a multi-agent platform on Google Cloud that takes a product launch from brief to sent
-campaign. A marketer uploads a launch brief; agents extract the product facts, research the market,
-draft copy for every channel in the brand voice, check it against brand and legal rules, and wait for a
-person to approve before anything is sent. The same platform matches the announcement to relevant
-journalists and runs a public product advisor for shoppers.
+FireWatch turns raw environmental sensor events into **investigated, evidence-backed, human-approved**
+wildfire incident decisions within minutes, and remembers each outcome so the next investigation is
+smarter.
 
-It is built with the [Agent Development Kit (ADK)](https://adk.dev) 2.10, deployed with
-[agents-cli](https://pypi.org/project/google-agents-cli/) 1.7, and runs on Gemini models through the
-Gemini Enterprise Agent Platform.
+Wildfire detection today relies on fragmented signals: ground sensors, weather feeds, satellite
+hotspots and historical reports live in separate systems. Operators correlate them by hand, and false
+positives (industrial smoke, agricultural burns) cause alert fatigue. FireWatch brings those signals
+together, has an agent investigate every anomaly, computes risk with an auditable formula, and leaves
+every consequential decision to a person.
 
-## What it does
+> FireWatch is a decision-support prototype. It does not dispatch emergency services, does not replace
+> official alerting systems, and runs on synthetic and public data.
 
-| Area | What happens | Main pieces |
-| --- | --- | --- |
-| **Knowledge** | Briefs and documents are screened, parsed (text, tables, images) and made searchable; users ask questions and get answers with `[document, page]` citations, or search pages by image | Vertex AI Search (`kb`, `catalog`), ingest worker, knowledge agent |
-| **Campaign engine** | A workflow graph: extract facts → person confirms → research and judge (loop) → five copy agents in parallel → claim audit → compliance check → person approves → dispatch | Orchestrator on Agent Runtime, researcher and judge as A2A services, skills with a compliance script |
-| **Media Match** | Finds the 20 best-fit journalists for an announcement (vector search, opt-outs excluded), writes personalised pitches for a PR manager to approve | media-matcher service, AlloyDB + pgvector, pitch worker |
-| **Product Advisor** | Public chat that recommends paint and calculates how much to buy | Advisor agent, catalog search |
-| **Guardrails** | Every model input and output is screened; banned claims are blocked; every block is logged | Model Armor, keyword guardrail, `guardrail_events` |
+## How it works
+
+1. **Sense.** Sensors (a simulator with `normal`, `wildfire` and `industrial` modes) publish readings to
+   Pub/Sub. A Dataflow pipeline validates them and computes rolling features per sensor.
+2. **Detect.** When the anomaly score or the model's wildfire probability crosses a threshold, an
+   incident is created (deduplicated per sensor and time window) and appears on the live map.
+3. **Investigate.** A deterministic ADK workflow runs: screen untrusted input → analyse the sensor →
+   ML prediction → weather, regional history, cited knowledge (RAG) and similar past incidents in
+   parallel → risk fusion → recommendation. Every step is streamed to the operator's trace panel.
+4. **Explain.** Risk is computed by a weighted formula, never by the LLM. Gemini only writes the
+   recommendation and answers the operator's questions in chat, grounded in tool outputs and cited
+   documents.
+5. **Decide.** The agent can only *request* approval. Approve and reject are authenticated actions by a
+   human operator, recorded with the risk snapshot.
+6. **Learn.** The real outcome (confirmed fire, industrial smoke, false alarm) is written into an
+   incident-memory corpus, so a matching signature later is recognised.
+
+### Risk function
+
+```text
+weights  = {p_wildfire: 0.40, sensor_anomaly: 0.25, weather_risk: 0.15, historical_risk: 0.10, visual_probability: 0.10}
+risk     = Σ(wᵢ·sᵢ for signals present) / Σ(wᵢ for signals present)     # renormalised when a signal is missing
+coverage = Σ(wᵢ for signals present)                                    # shown in the UI
+level    = LOW < 0.40 ≤ MEDIUM < 0.70 ≤ HIGH                            # "needs evidence" hint when coverage < 0.65
+```
+
+Weights and their version live in config and are stored on every incident.
 
 ## Architecture
 
 ```text
- Browser ──▶ Next.js app (UI + BFF route handlers, Cloud Run) ──▶ Agent Runtime: orchestrator, advisor, knowledge
-    │  signed upload                     │ Firebase Auth, roles            │ A2A (IAM)
-    ▼                                    ▼                                 ▼
- Cloud Storage ──▶ Pub/Sub ──▶ ingest worker            Firestore     Cloud Run: researcher, judge, media-matcher ──▶ AlloyDB (VPC)
-                                   └─▶ Vertex AI Search (kb)         (live timeline)          dispatch worker ◀── Pub/Sub
+ Browser (Next.js) ── REST + chat SSE ──▶ firewatch-api (Cloud Run: FastAPI + ADK)
+   │ Firestore listeners (read-only)          │  investigation workflow · chat agent · Model Armor
+   ▼                                          ├──▶ Gemini (Agent Platform)
+ Firestore: incidents, agent_events,          ├──▶ classifier endpoint (XGBoost)
+            approvals                         ├──▶ RAG Engine: knowledge + incident memory
+                                              └──▶ weather API (Open-Meteo)
+ Simulator ─▶ Pub/Sub sensor-raw ─▶ Dataflow (features) ─▶ BigQuery + Pub/Sub sensor-features ─push─▶ firewatch-api
+
+ Offline: GCS raw ─▶ Dataprep by Alteryx ─▶ BigQuery curated ─▶ Serverless Spark ─▶ training tables
+          ─▶ XGBoost training ─▶ Model Registry ─▶ endpoint
 ```
 
-The browser only talks to the BFF, which holds the credentials for the agents. Uploads go straight to
-Cloud Storage with signed URLs. Only services inside the VPC can reach AlloyDB. Everything is provisioned
-with Terraform in a single Google Cloud project.
+| Service | Runs on | Role |
+| --- | --- | --- |
+| `firewatch-web` | Cloud Run (Node 22) | Dashboard, map, incident view, chat, Firebase Auth |
+| `firewatch-api` | Cloud Run (Python 3.12) | Pub/Sub push handler, REST, chat streaming, investigation workflow, tools |
+| `firewatch-stream` | Dataflow (streaming) | Validation, rolling features, BigQuery sink |
+| `firewatch-batch` | Serverless for Apache Spark | Regional and historical aggregates, training tables |
+| `firewatch-classifier` | Agent Platform endpoint | Wildfire probability and anomaly score |
+| `firewatch-knowledge`, `firewatch-memory` | RAG Engine corpora | Procedures and reports; resolved incidents with outcomes |
 
-## Repository layout
+## Screens
 
-| Path | Contents |
+| Screen | Purpose |
 | --- | --- |
-| `agents/` | One [agents-cli](https://pypi.org/project/google-agents-cli/) project per agent: `orchestrator`, `advisor` (Agent Runtime); `researcher`, `judge`, `media-matcher` (Cloud Run, A2A) |
-| `apps/web/` | Next.js 16 app: UI and BFF route handlers |
-| `packages/shared-py/` | `firewatch_shared`: Pydantic models shared by agents and workers |
-| `packages/shared-ts/` | zod schemas generated from the Python models |
-| `workers/` | Cloud Run workers and jobs: `ingest`, `dispatch`, `backfill` |
-| `skills/` | Agent skills (brand voice, rules, compliance script) |
-| `infra/terraform/` | `modules/firewatch` (all platform resources), `modules/cicd` (Cloud Build triggers), `envs/dev` |
-| `cloudbuild/` | Pipeline files used by the triggers |
-| `firestore/` | Security rules, indexes and their tests |
-| `tools/` | Seed data generator and loader, document builder |
-| `data/seed/` | Synthetic demo data (briefs, catalog, journalists, swatches) |
-| `docs/` | Implementation guide, playbook, ADRs |
+| Operations dashboard (`/`) | Live map and incident list, system status |
+| Incident investigation (`/incidents/[id]`) | Signals, risk breakdown, live agent trace, evidence with citations, approve / reject / record outcome |
+| Chat | Bound to an incident: "why is this high risk?", "get more evidence" |
+| Data platform (`/data-platform`) | Real status of Dataflow, Spark, Dataprep, the endpoint and RAG corpora |
+| Evaluation (`/evaluation`) | ML, RAG and agent metrics from the eval harness |
+
+## Technology
+
+ADK 2.x on Gemini Enterprise Agent Platform (`gemini-3.8-flash`, `gemini-3.5-flash-lite`), RAG Engine,
+XGBoost on an Agent Platform endpoint, Pub/Sub, Dataflow (Apache Beam), Serverless for Apache Spark,
+Cloud Dataprep by Alteryx, BigQuery, Firestore, Cloud Run, Model Armor, Firebase Auth, Next.js 16 with
+Tailwind and shadcn/ui, Terraform and Cloud Build.
+
+## Targets
+
+| Metric | Target |
+| --- | --- |
+| Sensor event → incident on the dashboard | < 10 s (direct), < 30 s (via Dataflow) |
+| Full investigation | < 60 s |
+| Classifier ROC-AUC (held-out synthetic set) | ≥ 0.90 |
+| False-positive rate at HIGH | ≤ 10% |
+| Citation correctness | ≥ 90% |
+| Scripted prompt-injection attempts blocked | 100% |
+| Consequential actions without human approval | 0 |
+
+## Repository status
+
+This repository is being repurposed for FireWatch. It currently contains the **platform foundation**
+built for an earlier agent product, which FireWatch reuses:
+
+- a uv/pnpm monorepo with agents-cli agent projects under `agents/` (to be replaced by the FireWatch
+  investigation workflow and chat agent);
+- Terraform for a single Google Cloud project (`infra/terraform`: service accounts, Pub/Sub with
+  dead-letter topics, Firestore, BigQuery, Secret Manager, networking, Vertex AI Search) and Cloud Build
+  CI with path-filtered pull-request checks and deploy triggers;
+- a local stack (`docker-compose.yml`: Postgres with pgvector, Firestore and Pub/Sub emulators) and
+  `make` targets;
+- Firestore security rules with tests.
+
+The FireWatch-specific services (sensor simulator, `firewatch-api`, Dataflow and Spark pipelines,
+classifier, RAG corpora, operator UI) are built following the blueprint below.
 
 ## Getting started
 
-### Prerequisites
-
-Google Cloud CLI, Docker with Compose, Terraform ≥ 1.8, [uv](https://docs.astral.sh/uv/), Node 22 with
-`corepack enable`, and `agents-cli` 1.7:
-
 ```bash
 uv tool install --upgrade 'google-agents-cli==1.7.*'
-gcloud auth login
-gcloud auth application-default login
+gcloud auth login && gcloud auth application-default login
 gcloud auth application-default set-quota-project <PROJECT_ID>
+
+make install     # Python workspace and web dependencies
+make up          # local Postgres + pgvector (5433), Firestore (8080) and Pub/Sub (8085) emulators
+make help        # every target
 ```
 
-The quota project matters: Discovery Engine and Model Armor reject user credentials without one.
-
-### Run locally
-
-```bash
-make install          # Python workspace (uv) and web dependencies
-make up               # Postgres + pgvector (port 5433), Firestore emulator (8080), Pub/Sub emulator (8085)
-make seed             # demo data into the local database and the dev project's buckets and search
-make dev AGENT=orchestrator   # web app + one agent's playground; Ctrl+C stops both
-```
-
-Each agent reads its own `agents/<name>/.env` (copy `.env.example`). `make help` lists every target.
-
-### Provision and deploy
-
-```bash
-cd infra/terraform/envs/dev
-terraform init && terraform plan -out=dev.tfplan && terraform apply dev.tfplan
-```
-
-After that, merging to `main` deploys: each agent, worker and the web app has a path-filtered pull
-request check and a deploy trigger in Cloud Build. The first deploy of each agent is done by hand
-(`agents-cli deploy …`); CI only updates existing deployments.
-
-## Working conventions
-
-- **Dependencies:** after editing any `pyproject.toml`, run `make lock`. It updates the workspace lock
-  and each service's own `uv.lock`, which its Dockerfile installs from.
-- **Shared models:** after editing `packages/shared-py/firewatch_shared/models.py`, run `make schemas`
-  and commit the regenerated `packages/shared-ts` files.
-- **Model location:** Gemini 3.x chat models are served on the `global` endpoint, so agents pin
-  `GOOGLE_CLOUD_LOCATION=global`; embeddings (`gemini-embedding-001`) use `us-east1`.
-- **Infrastructure:** change resources in Terraform only, always `plan` before `apply`.
-- **Tests:** `make test-rules` for Firestore rules; `uv run --package <agent> pytest agents/<agent>/tests/unit` for an agent.
-
-## Status
-
-Foundation is in place: monorepo, agent scaffolds, local stack, Terraform for the platform, Firestore
-rules, single-project CI/CD, shared models, seed data and the Vertex AI Search datastores. Identity, the
-web shell, the ingest worker and the campaign graph are next. The step-by-step plan and progress are in
-the documents below.
+Provision with Terraform from `infra/terraform/envs/dev` (`terraform init`, `plan`, `apply`). Gemini 3.x
+chat models are served on the `global` endpoint; set `GOOGLE_CLOUD_LOCATION=global` for agents and keep
+data services in their region.
 
 ## Documentation
 
-- [Full implementation guide](docs/firewatch-full-implementation.md): every step from an empty project to go-live, with commands and code
-- [Implementation playbook](docs/firewatch-implementation-playbook.md): the remaining steps in detail
-- [`docs/adr/`](docs/adr/): architecture decisions
+- [FireWatch Implementation Blueprint](docs/FireWatch_Implementation_Blueprint.md): PRD, technical design,
+  UI, app flow, schemas, plan and step-by-step build guide
+- [`docs/firewatch-full-implementation.md`](docs/firewatch-full-implementation.md) and
+  [`docs/firewatch-implementation-playbook.md`](docs/firewatch-implementation-playbook.md): how the
+  reused foundation (Terraform, CI, local stack, Firestore rules) was built, step by step. Their
+  application-specific steps describe the earlier product, not FireWatch.
