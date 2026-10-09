@@ -7,12 +7,18 @@ terraform {
   }
 }
 
+# user_project_override + billing_project: bill API quota to this project. Some APIs
+# (Discovery Engine, Model Armor) reject user credentials that have no quota project.
 provider "google" {
-  project = var.project_id
-  region  = var.region
+  project               = var.project_id
+  region                = var.region
+  user_project_override = true
+  billing_project       = var.project_id
 }
 
 provider "google-beta" {
-  project = var.project_id
-  region  = var.region
+  project               = var.project_id
+  region                = var.region
+  user_project_override = true
+  billing_project       = var.project_id
 }

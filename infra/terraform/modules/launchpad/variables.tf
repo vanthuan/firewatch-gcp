@@ -28,6 +28,12 @@ variable "enable_alloydb" {
   default     = false
 }
 
+variable "search_location" {
+  description = "Vertex AI Search location: global, us or eu"
+  type        = string
+  default     = "global"
+}
+
 variable "subnet_cidr" {
   type    = string
   default = "10.10.0.0/24"

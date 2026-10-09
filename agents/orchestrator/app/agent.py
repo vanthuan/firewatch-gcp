@@ -28,6 +28,13 @@ from google.adk.plugins.bigquery_agent_analytics_plugin import (
 from google.cloud import bigquery
 
 
+import os
+
+# Gemini 3.x models are served only from the global endpoint in this project (regional endpoints
+# return 404), so the model location is pinned here, before any model client is created. Data
+# services keep their own region below.
+os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
+
 MODEL = "gemini-3.6-flash"
 
 
@@ -73,13 +80,11 @@ root_agent = Agent(
     instruction="You are a helpful AI assistant designed to provide accurate and useful information.",
     tools=[get_weather, get_current_time],
 )
-import os
-
 # Initialize BigQuery Analytics
 _plugins = []
 _project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
 _dataset_id = os.environ.get("BQ_ANALYTICS_DATASET_ID", "adk_agent_analytics")
-_location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-east1")
+_location = os.environ.get("BQ_ANALYTICS_LOCATION", "us-east1")  # BigQuery needs a real region, not "global"
 
 if _project_id:
     try:

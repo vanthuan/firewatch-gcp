@@ -1,0 +1,41 @@
+full_name,email,outlet,region,beats,bio,opted_out
+Noah Harper,noah.harper@example.com,Coastal Homes Magazine,US-South,interior-design,"Noah Harper covers interior design for Coastal Homes Magazine, based in US-South.",false
+Grace Mensah,grace.mensah@example.com,Home & Hearth Weekly,US-Northeast,diy,"Grace Mensah covers diy for Home & Hearth Weekly, based in US-Northeast.",false
+Tomas Mensah,tomas.mensah@example.com,Trade Paint Journal,US-West,consumer-products;home-improvement;retail,"Tomas Mensah covers consumer products, home improvement, retail for Trade Paint Journal, based in US-West.",false
+Chloe Tanaka,chloe.tanaka@example.com,Green Living Daily,US-South,home-improvement;sustainability,"Chloe Tanaka covers home improvement, sustainability for Green Living Daily, based in US-South.",false
+Kofi Tanaka,kofi.tanaka@example.com,Home & Hearth Weekly,Canada,diy;sustainability,"Kofi Tanaka covers diy, sustainability for Home & Hearth Weekly, based in Canada.",false
+Grace Patel,grace.patel@example.com,The Renovation Report,US-Northeast,consumer-products;diy;interior-design,"Grace Patel covers consumer products, diy, interior design for The Renovation Report, based in US-Northeast.",false
+Nina Tanaka,nina.tanaka@example.com,Retail Pulse,Canada,interior-design;real-estate,"Nina Tanaka covers interior design, real estate for Retail Pulse, based in Canada.",false
+Maya Kowalski,maya.kowalski@example.com,Trade Paint Journal,US-South,consumer-products;interior-design,"Maya Kowalski covers consumer products, interior design for Trade Paint Journal, based in US-South.",true
+Liam Moreau,liam.moreau@example.com,Home & Hearth Weekly,US-Midwest,home-improvement;retail,"Liam Moreau covers home improvement, retail for Home & Hearth Weekly, based in US-Midwest.",false
+Nina O'Neill,nina.oneill@example.com,Green Living Daily,US-Midwest,diy,"Nina O'Neill covers diy for Green Living Daily, based in US-Midwest.",false
+Grace Fischer,grace.fischer@example.com,Design Desk,US-South,real-estate,"Grace Fischer covers real estate for Design Desk, based in US-South.",false
+Zoe Kowalski,zoe.kowalski@example.com,DIY Nation,UK,consumer-products,"Zoe Kowalski covers consumer products for DIY Nation, based in UK.",false
+Tomas Harper,tomas.harper@example.com,The Renovation Report,Canada,construction-trade;consumer-products;retail,"Tomas Harper covers construction trade, consumer products, retail for The Renovation Report, based in Canada.",false
+Ethan O'Neill,ethan.oneill@example.com,Home & Hearth Weekly,Canada,real-estate;retail;sustainability,"Ethan O'Neill covers real estate, retail, sustainability for Home & Hearth Weekly, based in Canada.",false
+Ines Patel,ines.patel@example.com,Green Living Daily,US-Midwest,home-improvement,"Ines Patel covers home improvement for Green Living Daily, based in US-Midwest.",false
+Noah Reyes,noah.reyes@example.com,Coastal Homes Magazine,US-South,diy,"Noah Reyes covers diy for Coastal Homes Magazine, based in US-South.",true
+Maya Brennan,maya.brennan@example.com,Green Living Daily,Canada,interior-design;real-estate,"Maya Brennan covers interior design, real estate for Green Living Daily, based in Canada.",false
+Omar Fischer,omar.fischer@example.com,Design Desk,US-West,home-improvement;real-estate;sustainability,"Omar Fischer covers home improvement, real estate, sustainability for Design Desk, based in US-West.",false
+Grace Moreau,grace.moreau@example.com,Trade Paint Journal,US-Northeast,home-improvement,"Grace Moreau covers home improvement for Trade Paint Journal, based in US-Northeast.",false
+Maya Moreau,maya.moreau@example.com,Coastal Homes Magazine,Canada,diy;retail,"Maya Moreau covers diy, retail for Coastal Homes Magazine, based in Canada.",false
+Samuel Patel,samuel.patel@example.com,The Renovation Report,US-Northeast,consumer-products;diy;interior-design,"Samuel Patel covers consumer products, diy, interior design for The Renovation Report, based in US-Northeast.",false
+Noah Nguyen,noah.nguyen@example.com,DIY Nation,Canada,real-estate;sustainability,"Noah Nguyen covers real estate, sustainability for DIY Nation, based in Canada.",false
+Zoe Mensah,zoe.mensah@example.com,Green Living Daily,US-Midwest,consumer-products;diy,"Zoe Mensah covers consumer products, diy for Green Living Daily, based in US-Midwest.",false
+Liam Harper,liam.harper@example.com,The Renovation Report,US-South,consumer-products,"Liam Harper covers consumer products for The Renovation Report, based in US-South.",true
+Liam Kowalski,liam.kowalski@example.com,DIY Nation,US-Northeast,consumer-products;retail,"Liam Kowalski covers consumer products, retail for DIY Nation, based in US-Northeast.",false
+Tomas Castillo,tomas.castillo@example.com,Green Living Daily,US-South,diy;home-improvement,"Tomas Castillo covers diy, home improvement for Green Living Daily, based in US-South.",false
+Liam Nguyen,liam.nguyen@example.com,Retail Pulse,UK,home-improvement;interior-design;retail,"Liam Nguyen covers home improvement, interior design, retail for Retail Pulse, based in UK.",false
+Lucas Fischer,lucas.fischer@example.com,The Renovation Report,UK,home-improvement,"Lucas Fischer covers home improvement for The Renovation Report, based in UK.",false
+Hana Patel,hana.patel@example.com,Design Desk,US-South,consumer-products;sustainability,"Hana Patel covers consumer products, sustainability for Design Desk, based in US-South.",false
+Maya Harper,maya.harper@example.com,Retail Pulse,UK,home-improvement;retail;sustainability,"Maya Harper covers home improvement, retail, sustainability for Retail Pulse, based in UK.",false
+Diego Haddad,diego.haddad@example.com,Green Living Daily,US-West,construction-trade;real-estate;retail,"Diego Haddad covers construction trade, real estate, retail for Green Living Daily, based in US-West.",false
+Noah Brennan,noah.brennan@example.com,Coastal Homes Magazine,US-Northeast,interior-design,"Noah Brennan covers interior design for Coastal Homes Magazine, based in US-Northeast.",true
+Chloe Patel,chloe.patel@example.com,Coastal Homes Magazine,UK,consumer-products;retail,"Chloe Patel covers consumer products, retail for Coastal Homes Magazine, based in UK.",false
+Hana Nguyen,hana.nguyen@example.com,Home & Hearth Weekly,US-Midwest,retail,"Hana Nguyen covers retail for Home & Hearth Weekly, based in US-Midwest.",false
+Noah Okafor,noah.okafor@example.com,Green Living Daily,UK,construction-trade,"Noah Okafor covers construction trade for Green Living Daily, based in UK.",false
+Liam Haddad,liam.haddad@example.com,Design Desk,US-Northeast,construction-trade;diy,"Liam Haddad covers construction trade, diy for Design Desk, based in US-Northeast.",false
+Kofi Brennan,kofi.brennan@example.com,Trade Paint Journal,US-South,consumer-products,"Kofi Brennan covers consumer products for Trade Paint Journal, based in US-South.",false
+Samuel Moreau,samuel.moreau@example.com,Coastal Homes Magazine,US-South,diy;home-improvement;sustainability,"Samuel Moreau covers diy, home improvement, sustainability for Coastal Homes Magazine, based in US-South.",false
+Leila Reyes,leila.reyes@example.com,Coastal Homes Magazine,US-South,home-improvement,"Leila Reyes covers home improvement for Coastal Homes Magazine, based in US-South.",false
+Hana Okafor,hana.okafor@example.com,Coastal Homes Magazine,US-Midwest,construction-trade;consumer-products;retail,"Hana Okafor covers construction trade, consumer products, retail for Coastal Homes Magazine, based in US-Midwest.",true

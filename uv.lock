@@ -17,6 +17,7 @@ resolution-markers = [
 members = [
     "advisor",
     "judge",
+    "launchpad-shared",
     "media-matcher",
     "orchestrator",
     "researcher",
@@ -1799,6 +1800,17 @@ dev = [
 ]
 
 [[package]]
+name = "launchpad-shared"
+version = "0.1.0"
+source = { editable = "packages/shared-py" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.7,<3" }]
+
+[[package]]
 name = "litellm"
 version = "1.85.7"
 source = { registry = "https://pypi.org/simple" }
@@ -2515,8 +2527,8 @@ requires-dist = [
     { name = "gcsfs", specifier = ">=2024.11.0" },
     { name = "google-adk", extras = ["a2a", "bigquery-analytics", "gcp", "otel-gcp"], specifier = "==2.10.*" },
     { name = "google-adk", extras = ["eval"], marker = "extra == 'eval'", specifier = ">=2.5.0,<3.0.0" },
+    { name = "google-cloud-aiplatform", extras = ["agent-engines", "evaluation"], specifier = ">=1.156.0,<2.0.0" },
     { name = "google-cloud-aiplatform", extras = ["evaluation"], marker = "extra == 'eval'", specifier = ">=1.156.0" },
-    { name = "google-cloud-aiplatform", extras = ["evaluation", "agent-engines"], specifier = ">=1.156.0" },
     { name = "google-cloud-logging", specifier = ">=3.12.0,<4.0.0" },
     { name = "opentelemetry-resourcedetector-gcp", specifier = "<=1.12.0a0" },
     { name = "protobuf", specifier = ">=6.31.1,<7.0.0" },

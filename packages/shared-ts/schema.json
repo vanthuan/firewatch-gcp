@@ -1,0 +1,218 @@
+{
+  "$defs": {
+    "Citation": {
+      "properties": {
+        "kind": {
+          "enum": [
+            "text",
+            "image",
+            "table",
+            "web"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "kind"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "ClaimCheck": {
+      "properties": {
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Citation"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "verdict": {
+          "enum": [
+            "supported",
+            "unsupported",
+            "corrected"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim",
+        "verdict",
+        "sources"
+      ],
+      "title": "ClaimCheck",
+      "type": "object"
+    },
+    "JournalistMatch": {
+      "properties": {
+        "journalist_id": {
+          "format": "uuid",
+          "title": "Journalist Id",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "journalist_id",
+        "score",
+        "reason"
+      ],
+      "title": "JournalistMatch",
+      "type": "object"
+    },
+    "JudgeVerdict": {
+      "properties": {
+        "gaps": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Gaps",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "JudgeVerdict",
+      "type": "object"
+    },
+    "ProductFactSheet": {
+      "properties": {
+        "audience": {
+          "title": "Audience",
+          "type": "string"
+        },
+        "key_features": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Key Features",
+          "type": "array"
+        },
+        "launch_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Launch Date"
+        },
+        "price_usd": {
+          "title": "Price Usd",
+          "type": "number"
+        },
+        "product_line": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Line"
+        },
+        "product_name": {
+          "title": "Product Name",
+          "type": "string"
+        },
+        "promo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. '20% off until Jun 30'",
+          "title": "Promo"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Citation"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "specs": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "title": "Specs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "product_name",
+        "price_usd",
+        "key_features",
+        "audience",
+        "sources"
+      ],
+      "title": "ProductFactSheet",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

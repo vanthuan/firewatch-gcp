@@ -56,7 +56,7 @@ resource "google_storage_bucket_iam_member" "telemetry_connection_access" {
 }
 
 # ====================================================================
-# Log Sinks — route GenAI and feedback logs directly to BigQuery
+# Log Sinks — route GenAI logs directly to BigQuery
 # ====================================================================
 
 # Log sink to route GenAI telemetry logs directly to BigQuery
@@ -78,23 +78,6 @@ resource "google_logging_project_sink" "genai_logs_to_bq" {
   depends_on = [google_bigquery_dataset.telemetry_dataset]
 }
 
-# Log sink for user feedback logs — routes to the same BigQuery dataset
-resource "google_logging_project_sink" "feedback_logs_to_bq" {
-  for_each    = local.deploy_project_ids
-  name        = "${var.project_name}-feedback"
-  project     = each.value
-  destination = "bigquery.googleapis.com/projects/${each.value}/datasets/${google_bigquery_dataset.telemetry_dataset[each.key].dataset_id}"
-  filter      = var.feedback_logs_filter
-
-  unique_writer_identity = true
-
-  bigquery_options {
-    use_partitioned_tables = true
-  }
-
-  depends_on = [google_bigquery_dataset.telemetry_dataset]
-}
-
 # Grant log sink service accounts write access to the BigQuery dataset
 resource "google_bigquery_dataset_iam_member" "genai_logs_bq_writer" {
   for_each   = local.deploy_project_ids
@@ -102,14 +85,6 @@ resource "google_bigquery_dataset_iam_member" "genai_logs_bq_writer" {
   dataset_id = google_bigquery_dataset.telemetry_dataset[each.key].dataset_id
   role       = "roles/bigquery.dataEditor"
   member     = google_logging_project_sink.genai_logs_to_bq[each.key].writer_identity
-}
-
-resource "google_bigquery_dataset_iam_member" "feedback_logs_bq_writer" {
-  for_each   = local.deploy_project_ids
-  project    = each.value
-  dataset_id = google_bigquery_dataset.telemetry_dataset[each.key].dataset_id
-  role       = "roles/bigquery.dataEditor"
-  member     = google_logging_project_sink.feedback_logs_to_bq[each.key].writer_identity
 }
 
 # ====================================================================

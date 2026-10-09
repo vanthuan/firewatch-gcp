@@ -30,9 +30,9 @@ resource "google_cloudbuild_trigger" "pr_checks" {
   filename = ".cloudbuild/pr_checks.yaml"
   included_files = [
     "app/**",
-    "tests/**",
     "deployment/**",
     "uv.lock",
+    "tests/**",
   ]
   include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
   depends_on = [
@@ -61,9 +61,9 @@ resource "google_cloudbuild_trigger" "cd_pipeline" {
   filename = ".cloudbuild/staging.yaml"
   included_files = [
     "app/**",
-    "tests/**",
     "deployment/**",
-    "uv.lock"
+    "uv.lock",
+    "tests/**",
   ]
   include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
   substitutions = {

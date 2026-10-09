@@ -1,0 +1,16 @@
+{
+  "name": "@launchpad/shared-ts",
+  "private": true,
+  "type": "module",
+  "main": "src/schemas.ts",
+  "types": "src/schemas.ts",
+  "scripts": {
+    "generate": "node generate.mjs"
+  },
+  "dependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "json-schema-to-zod": "^2.6.0"
+  }
+}

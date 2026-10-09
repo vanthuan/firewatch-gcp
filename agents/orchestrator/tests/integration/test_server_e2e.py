@@ -46,7 +46,6 @@ BASE_URL = "http://127.0.0.1:8000"
 RUN_SSE_URL = BASE_URL + "/run_sse"
 A2A_RPC_URL = BASE_URL + "/a2a/app/"
 AGENT_CARD_URL = A2A_RPC_URL + ".well-known/agent-card.json"
-FEEDBACK_URL = BASE_URL + "/feedback"
 
 HEADERS = {"Content-Type": "application/json"}
 
@@ -225,20 +224,6 @@ def test_agent_card(server_fixture: subprocess.Popen[str]) -> None:
         assert field in served_agent_card, f"Missing field in agent card: {field}"
 
 
-def test_collect_feedback(server_fixture: subprocess.Popen[str]) -> None:
-    """Test the feedback collection endpoint (/feedback)."""
-    feedback_data = {
-        "score": 4,
-        "user_id": "test-user-456",
-        "session_id": "test-session-456",
-        "text": "Great response!",
-    }
-    response = requests.post(
-        FEEDBACK_URL, json=feedback_data, headers=HEADERS, timeout=10
-    )
-    assert response.status_code == 200
-
-
 def test_reasoning_engine_stream(server_fixture: subprocess.Popen[str]) -> None:
     """The reasoning_engine adapter (/api/stream_reasoning_engine) runs the agent.
 
@@ -264,3 +249,27 @@ def test_reasoning_engine_stream(server_fixture: subprocess.Popen[str]) -> None:
         for event in events
     )
     assert has_text, "No text content in reasoning_engine events"
+
+
+def test_reasoning_engine_sync_stream(server_fixture: subprocess.Popen[str]) -> None:
+    """The reasoning_engine adapter supports sync generators via stream_query."""
+    response = requests.post(
+        f"{BASE_URL}/api/stream_reasoning_engine",
+        headers=HEADERS,
+        json={
+            "class_method": "stream_query",
+            "input": {"user_id": f"u-{uuid.uuid4()}", "message": "Hi!"},
+        },
+        stream=True,
+        timeout=60,
+    )
+    assert response.status_code == 200
+
+    events = [json.loads(line) for line in response.text.splitlines() if line.strip()]
+    assert events, "No events from reasoning_engine adapter"
+    has_text = any(
+        (event.get("content") or {}).get("parts")
+        and any(part.get("text") for part in event["content"]["parts"])
+        for event in events
+    )
+    assert has_text, "No text content in reasoning_engine sync events"

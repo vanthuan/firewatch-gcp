@@ -51,7 +51,7 @@ resource "google_storage_bucket_iam_member" "telemetry_connection_access" {
 }
 
 # ====================================================================
-# Log Sinks — route GenAI and feedback logs directly to BigQuery
+# Log Sinks — route GenAI logs directly to BigQuery
 # ====================================================================
 
 # Log sink to route GenAI telemetry logs directly to BigQuery
@@ -72,35 +72,12 @@ resource "google_logging_project_sink" "genai_logs_to_bq" {
   depends_on = [google_bigquery_dataset.telemetry_dataset]
 }
 
-# Log sink for user feedback logs — routes to the same BigQuery dataset
-resource "google_logging_project_sink" "feedback_logs_to_bq" {
-  name        = "${var.project_name}-feedback"
-  project     = var.project_id
-  destination = "bigquery.googleapis.com/projects/${var.project_id}/datasets/${google_bigquery_dataset.telemetry_dataset.dataset_id}"
-  filter      = var.feedback_logs_filter
-
-  unique_writer_identity = true
-
-  bigquery_options {
-    use_partitioned_tables = true
-  }
-
-  depends_on = [google_bigquery_dataset.telemetry_dataset]
-}
-
 # Grant log sink service accounts write access to the BigQuery dataset
 resource "google_bigquery_dataset_iam_member" "genai_logs_bq_writer" {
   project    = var.project_id
   dataset_id = google_bigquery_dataset.telemetry_dataset.dataset_id
   role       = "roles/bigquery.dataEditor"
   member     = google_logging_project_sink.genai_logs_to_bq.writer_identity
-}
-
-resource "google_bigquery_dataset_iam_member" "feedback_logs_bq_writer" {
-  project    = var.project_id
-  dataset_id = google_bigquery_dataset.telemetry_dataset.dataset_id
-  role       = "roles/bigquery.dataEditor"
-  member     = google_logging_project_sink.feedback_logs_to_bq.writer_identity
 }
 
 # ====================================================================

@@ -1,0 +1,13 @@
+sku,name,line,price_usd,container_l,coverage_m2_l,finish,colour,hex,use
+ECO-MAT-SAGE,EcoGreen Interior Matte - Sage,EcoGreen,54.99,2.5,12.0,matte,Sage,#9CAF88,interior
+ECO-MAT-LINEN,EcoGreen Interior Matte - Linen,EcoGreen,54.99,2.5,12.0,matte,Linen,#EDE3D2,interior
+ECO-MAT-CHAR,EcoGreen Interior Matte - Charcoal,EcoGreen,54.99,2.5,12.0,matte,Charcoal,#3E4145,interior
+DUR-SAT-HARB,DuraCoat Exterior Satin - Harbor Blue,DuraCoat,69.99,2.5,10.0,satin,Harbor Blue,#2F5D7C,exterior
+DUR-SAT-STONE,DuraCoat Exterior Satin - Stone Grey,DuraCoat,69.99,2.5,10.0,satin,Stone Grey,#8A8D8F,exterior
+PUR-CEIL-WHT,PureMatte Ceiling White,PureMatte,39.99,2.5,14.0,flat,Brilliant White,#FAFAF7,interior
+KID-EGG-SKY,KidsSafe Washable Eggshell - Sky,KidsSafe,49.99,2.5,11.0,eggshell,Sky,#A7C7E7,interior
+KID-EGG-BUTTER,KidsSafe Washable Eggshell - Butter,KidsSafe,49.99,2.5,11.0,eggshell,Butter,#F6E3A1,interior
+PRM-PRO-WHT,Cymbal Primer Pro,Primer,34.99,2.5,9.0,flat,White,#FFFFFF,interior/exterior
+CLS-EMU-MAG,Classic Emulsion - Magnolia,Classic,29.99,2.5,13.0,matte,Magnolia,#F3E9D8,interior
+CLS-GLS-WHT,Classic Gloss - White,Classic,32.99,2.5,12.0,gloss,White,#FDFDFD,interior/exterior
+FLR-SAT-SLATE,FloorGuard Satin - Slate,FloorGuard,59.99,2.5,8.0,satin,Slate,#5A6068,interior

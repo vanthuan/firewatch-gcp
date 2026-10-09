@@ -13,7 +13,7 @@
 # limitations under the License.
 
 terraform {
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.11.0"
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -31,4 +31,11 @@ provider "google" {
   billing_project       = var.project_id
   region                = var.region
   user_project_override = true
+}
+
+# Enables local.bootstrap_services only. user_project_override is deliberately
+# unset so the call is billed to the caller, not to the target project.
+provider "google" {
+  alias  = "api_bootstrap"
+  region = var.region
 }
